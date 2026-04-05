@@ -4,8 +4,8 @@ services:
     runtime: python
     pythonVersion: "3.12.3"
     plan: free
-    buildCommand: pip install -r requirements.txt && alembic upgrade head
-    startCommand: gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+    buildCommand: pip install -r requirements.txt
+    startCommand: alembic upgrade head && gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
     envVars:
       - key: APP_NAME
         value: CallMyCar
