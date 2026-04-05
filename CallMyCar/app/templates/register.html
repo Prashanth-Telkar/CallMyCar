@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f0f4ff">
+  <title>CallMyCar - Register</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-2-4-2-4 2-4 2-2.7.6-4.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/>
+            <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+          </svg>
+        </div>
+        <h1>CallMyCar</h1>
+      </div>
+      <p class="subtitle" style="margin-top: 4px;">Connect with vehicle owners instantly</p>
+    </div>
+
+    <!-- Steps indicator -->
+    <div class="steps">
+      <div class="step active" id="step-ind-1">1</div>
+      <div class="step" id="step-ind-2">2</div>
+    </div>
+
+    <!-- Alert -->
+    <div id="alert" class="alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="alert-text"></span>
+    </div>
+
+    <!-- Step 1: Phone Number -->
+    <div id="step-phone" class="card">
+      <div class="hero-icon hero-icon-active" style="width: 56px; height: 56px; margin: 0 auto 16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+        </svg>
+      </div>
+      <h2>Register / Login</h2>
+      <form id="phone-form">
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" placeholder="e.g. 9876543210"
+                 pattern="[0-9]{10,15}" maxlength="15" required>
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-send-otp">
+          Send OTP
+        </button>
+      </form>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div id="step-otp" class="card hidden">
+      <div class="hero-icon hero-icon-active" style="width: 56px; height: 56px; margin: 0 auto 16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+      </div>
+      <h2>Verify OTP</h2>
+      <p class="subtitle" style="margin-bottom: 16px;">
+        Enter the OTP sent to <strong id="otp-phone-display"></strong>
+      </p>
+      <form id="otp-form">
+        <div class="form-group">
+          <label for="otp">OTP Code</label>
+          <input type="text" id="otp" placeholder="Enter 4-digit OTP"
+                 pattern="[0-9]{4,6}" maxlength="6" required
+                 inputmode="numeric" autocomplete="one-time-code">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-verify">
+          Verify
+        </button>
+      </form>
+    </div>
+
+    <div class="privacy-note" style="margin-top: 20px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Your phone number is never shared with anyone
+    </div>
+
+    <div class="footer">CallMyCar &copy; 2026 &middot; Privacy-first vehicle contact</div>
+  </div>
+
+  <script>
+    const API = '';
+    let currentPhone = '';
+
+    function showAlert(message, type) {
+      var el = document.getElementById('alert');
+      document.getElementById('alert-text').textContent = message;
+      el.className = 'alert show alert-' + type;
+      setTimeout(function() { el.classList.remove('show'); }, 4000);
+    }
+
+    function setLoading(btn, loading) {
+      if (loading) {
+        btn.disabled = true;
+        btn.dataset.origText = btn.textContent;
+        btn.innerHTML = '<span class="spinner"></span> Please wait...';
+      } else {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.origText;
+      }
+    }
+
+    // Step 1: Send OTP
+    document.getElementById('phone-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('phone').value.trim();
+      if (!phone) return;
+
+      const btn = document.getElementById('btn-send-otp');
+      setLoading(btn, true);
+
+      try {
+        const res = await fetch(`${API}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone_number: phone })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showAlert(data.detail || 'Failed to send OTP', 'error');
+          return;
+        }
+
+        currentPhone = phone;
+        document.getElementById('otp-phone-display').textContent = phone;
+        document.getElementById('step-phone').classList.add('hidden');
+        document.getElementById('step-otp').classList.remove('hidden');
+        document.getElementById('step-ind-2').classList.add('active');
+        showAlert('OTP sent successfully!', 'success');
+      } catch (err) {
+        showAlert('Network error. Try again.', 'error');
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+
+    // Step 2: Verify OTP
+    document.getElementById('otp-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const otp = document.getElementById('otp').value.trim();
+      if (!otp) return;
+
+      const btn = document.getElementById('btn-verify');
+      setLoading(btn, true);
+
+      try {
+        const res = await fetch(`${API}/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone_number: currentPhone, otp: otp })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showAlert(data.detail || 'Invalid OTP', 'error');
+          return;
+        }
+
+        showAlert('Verified! Redirecting...', 'success');
+        // Store phone in sessionStorage for the setup page
+        sessionStorage.setItem('phone', currentPhone);
+        setTimeout(() => window.location.href = '/setup', 1000);
+      } catch (err) {
+        showAlert('Network error. Try again.', 'error');
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+  </script>
+</body>
+</html>

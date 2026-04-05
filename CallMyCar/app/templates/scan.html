@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f0f4ff">
+  <title>CallMyCar - Contact Vehicle Owner</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container scan-page">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-2-4-2-4 2-4 2-2.7.6-4.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/>
+            <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+          </svg>
+        </div>
+        <h1>CallMyCar</h1>
+      </div>
+    </div>
+
+    <!-- Alert -->
+    <div id="alert" class="alert">
+      <svg id="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="alert-text"></span>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading-state">
+      <div class="loading-pulse">
+        <span></span><span></span><span></span>
+      </div>
+      <p style="color: var(--text-muted); font-size: 14px; margin-top: 16px;">Finding vehicle...</p>
+    </div>
+
+    <!-- Active QR -->
+    <div id="active-state" class="hidden">
+      <div class="hero-icon hero-icon-active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-2-4-2-4 2-4 2-2.7.6-4.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/>
+          <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+        </svg>
+      </div>
+      <h2>Vehicle Found</h2>
+      <p class="subtitle">This vehicle is registered on CallMyCar</p>
+      <span class="status-badge status-active">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><circle cx="12" cy="12" r="5"/></svg>
+        Active
+      </span>
+
+      <!-- Action Card -->
+      <div class="card" style="text-align: left;">
+
+        <!-- Phone input for call -->
+        <div id="call-phone-section">
+          <div class="form-group">
+            <label for="caller-phone">Your phone number</label>
+            <input type="tel" id="caller-phone" placeholder="e.g. 9876543210"
+                   pattern="[0-9]{10,15}" maxlength="15" inputmode="numeric"
+                   autocomplete="tel">
+            <p class="char-count">We'll connect you — your number stays hidden</p>
+          </div>
+        </div>
+
+        <button id="btn-call" class="btn btn-call" onclick="callOwner()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+          </svg>
+          Call Vehicle Owner
+        </button>
+
+        <div class="divider">or send a message</div>
+
+        <!-- Quick Messages -->
+        <p class="quick-msgs-label">Quick messages</p>
+        <div class="quick-msgs-wrap" id="quick-msgs">
+          <button type="button" class="quick-msg" onclick="selectQuickMsg(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            Blocking my way
+          </button>
+          <button type="button" class="quick-msg" onclick="selectQuickMsg(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17H4a2 2 0 01-2-2V5a2 2 0 012-2h16a2 2 0 012 2v10a2 2 0 01-2 2h-1"/><polygon points="12 15 17 21 7 21 12 15"/></svg>
+            Please move car
+          </button>
+          <button type="button" class="quick-msg" onclick="selectQuickMsg(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            Headlights on
+          </button>
+          <button type="button" class="quick-msg" onclick="selectQuickMsg(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Being towed
+          </button>
+          <button type="button" class="quick-msg" onclick="selectQuickMsg(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Someone hit car
+          </button>
+          <button type="button" class="quick-msg" onclick="selectQuickMsg(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            Alarm going off
+          </button>
+          <button type="button" class="quick-msg" onclick="selectQuickMsg(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Window is open
+          </button>
+          <button type="button" class="quick-msg" onclick="selectQuickMsg(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Tyre is flat
+          </button>
+        </div>
+
+        <!-- Custom Message -->
+        <div class="form-group">
+          <label for="wa-message">Your message</label>
+          <textarea id="wa-message" rows="2" maxlength="500"
+            placeholder="Type a custom message..."></textarea>
+          <p class="char-count"><span id="wa-char-count">0</span>/500</p>
+        </div>
+
+        <button id="btn-whatsapp" class="btn btn-whatsapp" onclick="whatsappOwner()">
+          <svg viewBox="0 0 24 24" fill="white" stroke="none">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          WhatsApp Vehicle Owner
+        </button>
+
+        <div class="privacy-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Your identity stays completely private
+        </div>
+      </div>
+    </div>
+
+    <!-- Inactive QR -->
+    <div id="inactive-state" class="hidden">
+      <div class="hero-icon hero-icon-inactive">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <h2>QR Not Active</h2>
+      <p class="subtitle">This QR code hasn't been linked to a vehicle yet.</p>
+      <span class="status-badge status-inactive">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><circle cx="12" cy="12" r="5"/></svg>
+        Inactive
+      </span>
+    </div>
+
+    <!-- Not found -->
+    <div id="notfound-state" class="hidden">
+      <div class="hero-icon hero-icon-error">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/>
+        </svg>
+      </div>
+      <h2>QR Not Found</h2>
+      <p class="subtitle">This QR code isn't registered in our system.</p>
+    </div>
+
+    <!-- Call success -->
+    <div id="calling-state" class="hidden">
+      <div class="hero-icon hero-icon-calling pulse-ring">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+        </svg>
+      </div>
+      <h2 style="color: var(--success);">Connecting...</h2>
+      <p class="subtitle">We're connecting you to the vehicle owner.<br>You'll receive a call shortly.</p>
+      <div class="privacy-note" style="margin-top: 24px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Your phone number is hidden from the owner
+      </div>
+    </div>
+
+    <!-- WhatsApp success -->
+    <div id="whatsapp-state" class="hidden">
+      <div class="success-check">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h2 style="color: var(--success);">Message Sent!</h2>
+      <p class="subtitle">The vehicle owner has been notified via WhatsApp.<br>They should respond shortly.</p>
+      <div class="privacy-note" style="margin-top: 24px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Your identity is hidden from the owner
+      </div>
+    </div>
+
+    <div class="footer">CallMyCar &copy; 2026 &middot; Privacy-first vehicle contact</div>
+  </div>
+
+  <script>
+    const API = '';
+    const QR_CODE_ID = '{{ qr_code_id }}';
+
+    function showAlert(msg, type) {
+      const el = document.getElementById('alert');
+      document.getElementById('alert-text').textContent = msg;
+      el.className = 'alert show alert-' + type;
+      setTimeout(function() { el.classList.remove('show'); }, 4000);
+    }
+
+    function showState(id) {
+      ['loading-state','active-state','inactive-state','notfound-state','calling-state','whatsapp-state']
+        .forEach(function(s) { document.getElementById(s).classList.add('hidden'); });
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    async function checkQR() {
+      try {
+        var r = await fetch(API + '/api/qr-status/' + encodeURIComponent(QR_CODE_ID));
+        if (r.status === 404) { showState('notfound-state'); return; }
+        var d = await r.json();
+        showState(d.status === 'active' ? 'active-state' : 'inactive-state');
+      } catch(e) { showState('notfound-state'); showAlert('Could not reach server.', 'error'); }
+    }
+
+    var callSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>';
+    var waSvg = '<svg viewBox="0 0 24 24" fill="white" stroke="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
+
+    function resetBtn(btn, type) {
+      btn.disabled = false;
+      btn.innerHTML = (type === 'call') ? callSvg + ' Call Vehicle Owner' : waSvg + ' WhatsApp Vehicle Owner';
+    }
+
+    async function callOwner() {
+      var btn = document.getElementById('btn-call');
+      var callerPhone = document.getElementById('caller-phone').value.trim();
+      if (!callerPhone || callerPhone.length < 10) {
+        showAlert('Please enter a valid phone number.', 'error');
+        document.getElementById('caller-phone').focus();
+        return;
+      }
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Connecting...';
+      try {
+        var r = await fetch(API + '/call-owner', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({qr_code_id:QR_CODE_ID, caller_phone:callerPhone}) });
+        var d = await r.json();
+        if (r.status===429) { showAlert('Too many calls. Try again later.','error'); resetBtn(btn,'call'); return; }
+        if (!r.ok) { showAlert(d.detail||'Call failed.','error'); resetBtn(btn,'call'); return; }
+        showState('calling-state');
+      } catch(e) { showAlert('Network error.','error'); resetBtn(btn,'call'); }
+    }
+
+    async function whatsappOwner() {
+      var btn = document.getElementById('btn-whatsapp');
+      var msg = document.getElementById('wa-message').value.trim();
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Sending...';
+      try {
+        var r = await fetch(API + '/whatsapp-owner', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({qr_code_id:QR_CODE_ID, message:msg}) });
+        var d = await r.json();
+        if (r.status===429) { showAlert('Too many contacts. Try later.','error'); resetBtn(btn,'wa'); return; }
+        if (!r.ok) { showAlert(d.detail||'Send failed.','error'); resetBtn(btn,'wa'); return; }
+        showState('whatsapp-state');
+      } catch(e) { showAlert('Network error.','error'); resetBtn(btn,'wa'); }
+    }
+
+    function selectQuickMsg(btn) {
+      var ta = document.getElementById('wa-message');
+      var all = document.querySelectorAll('.quick-msg');
+      if (btn.classList.contains('selected')) { btn.classList.remove('selected'); ta.value = ''; }
+      else { all.forEach(function(b) { b.classList.remove('selected'); }); btn.classList.add('selected'); ta.value = btn.textContent.trim(); }
+      document.getElementById('wa-char-count').textContent = ta.value.length;
+    }
+
+    checkQR();
+
+    var waMsgEl = document.getElementById('wa-message');
+    var waCountEl = document.getElementById('wa-char-count');
+    if (waMsgEl && waCountEl) {
+      waMsgEl.addEventListener('input', function() {
+        waCountEl.textContent = waMsgEl.value.length;
+        document.querySelectorAll('.quick-msg').forEach(function(b) { b.classList.remove('selected'); });
+      });
+    }
+  </script>
+</body>
+</html>

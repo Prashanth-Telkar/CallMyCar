@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: callmycar
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
+    startCommand: gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+    envVars:
+      - key: APP_NAME
+        value: CallMyCar
+      - key: APP_VERSION
+        value: 0.1.0
+      - key: DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        sync: false
+      - key: EXOTEL_SID
+        sync: false
+      - key: EXOTEL_API_KEY
+        sync: false
+      - key: EXOTEL_API_TOKEN
+        sync: false
+      - key: EXOTEL_VIRTUAL_NUMBER
+        sync: false
+      - key: MAX_CALLS_PER_QR_PER_HOUR
+        value: "3"
+      - key: BASE_URL
+        sync: false
+      - key: PYTHON_VERSION
+        value: "3.13.0"

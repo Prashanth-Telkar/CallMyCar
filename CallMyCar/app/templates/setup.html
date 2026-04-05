@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f0f4ff">
+  <title>CallMyCar - Link QR</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-2-4-2-4 2-4 2-2.7.6-4.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/>
+            <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+          </svg>
+        </div>
+        <h1>CallMyCar</h1>
+      </div>
+      <p class="subtitle" style="margin-top: 4px;">Link a QR code to your vehicle</p>
+    </div>
+
+    <!-- Alert -->
+    <div id="alert" class="alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="alert-text"></span>
+    </div>
+
+    <!-- Link Form -->
+    <div id="link-form-card" class="card">
+      <div class="hero-icon hero-icon-active" style="width: 56px; height: 56px; margin: 0 auto 16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        </svg>
+      </div>
+      <h2>Setup Your QR Code</h2>
+      <form id="link-form">
+        <div class="form-group">
+          <label for="qr_code_id">QR Code ID</label>
+          <input type="text" id="qr_code_id" placeholder="e.g. CMC-0FF59E688A"
+                 maxlength="50" required>
+        </div>
+        <div class="form-group">
+          <label for="vehicle_number">Vehicle Number</label>
+          <input type="text" id="vehicle_number" placeholder="e.g. MH12AB1234"
+                 maxlength="20" required style="text-transform: uppercase;">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-link">
+          Link QR to Vehicle
+        </button>
+      </form>
+    </div>
+
+    <!-- Success state -->
+    <div id="success-card" class="card hidden" style="text-align: center;">
+      <div class="success-check">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h2 style="color: var(--success);">QR Linked!</h2>
+      <p class="subtitle" style="margin: 12px 0;">
+        Your QR code <strong id="linked-qr"></strong> is now linked to vehicle
+        <strong id="linked-vehicle"></strong>.
+      </p>
+      <p class="subtitle" style="margin-bottom: 20px;">
+        Stick the QR on your vehicle. Anyone who scans it can contact you without seeing your number.
+      </p>
+      <a href="/setup" class="btn btn-primary" style="display: inline-block; text-decoration: none; max-width: 280px; margin: 0 auto;">
+        Link Another QR
+      </a>
+    </div>
+
+    <div class="privacy-note" style="margin-top: 20px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      Your phone number is never visible to callers
+    </div>
+
+    <div class="footer">CallMyCar &copy; 2026 &middot; Privacy-first vehicle contact</div>
+  </div>
+
+  <script>
+    const API = '';
+    const phone = sessionStorage.getItem('phone');
+
+    if (!phone) {
+      window.location.href = '/';
+    }
+
+    function showAlert(message, type) {
+      var el = document.getElementById('alert');
+      document.getElementById('alert-text').textContent = message;
+      el.className = 'alert show alert-' + type;
+      setTimeout(function() { el.classList.remove('show'); }, 4000);
+    }
+
+    function setLoading(btn, loading) {
+      if (loading) {
+        btn.disabled = true;
+        btn.dataset.origText = btn.textContent;
+        btn.innerHTML = '<span class="spinner"></span> Please wait...';
+      } else {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.origText;
+      }
+    }
+
+    document.getElementById('link-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const qrId = document.getElementById('qr_code_id').value.trim();
+      const vehicleNum = document.getElementById('vehicle_number').value.trim().toUpperCase();
+      if (!qrId || !vehicleNum) return;
+
+      const btn = document.getElementById('btn-link');
+      setLoading(btn, true);
+
+      try {
+        const res = await fetch(`${API}/link-qr`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            qr_code_id: qrId,
+            vehicle_number: vehicleNum,
+            phone_number: phone
+          })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showAlert(data.detail || 'Failed to link QR', 'error');
+          return;
+        }
+
+        document.getElementById('linked-qr').textContent = data.qr_code_id;
+        document.getElementById('linked-vehicle').textContent = data.vehicle_number;
+        document.getElementById('link-form-card').classList.add('hidden');
+        document.getElementById('success-card').classList.remove('hidden');
+      } catch (err) {
+        showAlert('Network error. Try again.', 'error');
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+  </script>
+</body>
+</html>
