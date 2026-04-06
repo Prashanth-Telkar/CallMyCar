@@ -19,8 +19,8 @@ else:
         pool_size=5,
         max_overflow=10,
         pool_timeout=30,
-        pool_recycle=1800,
-        connect_args={"connect_timeout": 10},
+        pool_recycle=300,
+        connect_args={"connect_timeout": 30},
     )
 
 try:

@@ -87,9 +87,19 @@
   <script>
     const API = '';
     const phone = sessionStorage.getItem('phone');
+    const urlParams = new URLSearchParams(window.location.search);
+    const qrFromUrl = urlParams.get('qr') || '';
 
     if (!phone) {
-      window.location.href = '/';
+      window.location.href = qrFromUrl ? '/?qr=' + encodeURIComponent(qrFromUrl) : '/';
+    }
+
+    // Auto-fill QR ID if provided via URL
+    if (qrFromUrl) {
+      var qrInput = document.getElementById('qr_code_id');
+      qrInput.value = qrFromUrl;
+      qrInput.readOnly = true;
+      qrInput.closest('.form-group').style.display = 'none';
     }
 
     function showAlert(message, type) {

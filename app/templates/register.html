@@ -91,6 +91,8 @@
   <script>
     const API = '';
     let currentPhone = '';
+    const urlParams = new URLSearchParams(window.location.search);
+    const qrId = urlParams.get('qr') || '';
 
     function showAlert(message, type) {
       var el = document.getElementById('alert');
@@ -170,7 +172,11 @@
         showAlert('Verified! Redirecting...', 'success');
         // Store phone in sessionStorage for the setup page
         sessionStorage.setItem('phone', currentPhone);
-        setTimeout(() => window.location.href = '/setup', 1000);
+        if (qrId) {
+          setTimeout(() => window.location.href = '/setup?qr=' + encodeURIComponent(qrId), 1000);
+        } else {
+          setTimeout(() => window.location.href = '/setup', 1000);
+        }
       } catch (err) {
         showAlert('Network error. Try again.', 'error');
       } finally {

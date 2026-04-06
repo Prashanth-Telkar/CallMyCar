@@ -57,7 +57,7 @@ def call_owner(
     try:
         result = exotel_service.connect_call(
             owner_phone=owner_phone,
-            caller_phone=payload.caller_phone,
+            caller_phone=payload.caller_phone or "",
         )
         call_status = "success"
     except Exception as e:

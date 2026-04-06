@@ -55,17 +55,6 @@
       <!-- Action Card -->
       <div class="card" style="text-align: left;">
 
-        <!-- Phone input for call -->
-        <div id="call-phone-section">
-          <div class="form-group">
-            <label for="caller-phone">Your phone number</label>
-            <input type="tel" id="caller-phone" placeholder="e.g. 9876543210"
-                   pattern="[0-9]{10,15}" maxlength="15" inputmode="numeric"
-                   autocomplete="tel">
-            <p class="char-count">We'll connect you — your number stays hidden</p>
-          </div>
-        </div>
-
         <button id="btn-call" class="btn btn-call" onclick="callOwner()">
           <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
@@ -147,6 +136,16 @@
         <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><circle cx="12" cy="12" r="5"/></svg>
         Inactive
       </span>
+      <div class="card" style="margin-top: 24px; text-align: center;">
+        <p style="margin-bottom: 16px; color: var(--text-muted);">Is this your QR sticker? Register your vehicle to activate it.</p>
+        <a id="btn-register" class="btn btn-primary" style="display: inline-block; text-decoration: none; max-width: 320px; margin: 0 auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;">
+            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-2-4-2-4 2-4 2-2.7.6-4.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/>
+            <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+          </svg>
+          Register My Vehicle
+        </a>
+      </div>
     </div>
 
     <!-- Not found -->
@@ -229,16 +228,10 @@
 
     async function callOwner() {
       var btn = document.getElementById('btn-call');
-      var callerPhone = document.getElementById('caller-phone').value.trim();
-      if (!callerPhone || callerPhone.length < 10) {
-        showAlert('Please enter a valid phone number.', 'error');
-        document.getElementById('caller-phone').focus();
-        return;
-      }
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span> Connecting...';
       try {
-        var r = await fetch(API + '/call-owner', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({qr_code_id:QR_CODE_ID, caller_phone:callerPhone}) });
+        var r = await fetch(API + '/call-owner', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({qr_code_id:QR_CODE_ID}) });
         var d = await r.json();
         if (r.status===429) { showAlert('Too many calls. Try again later.','error'); resetBtn(btn,'call'); return; }
         if (!r.ok) { showAlert(d.detail||'Call failed.','error'); resetBtn(btn,'call'); return; }
@@ -267,6 +260,10 @@
       else { all.forEach(function(b) { b.classList.remove('selected'); }); btn.classList.add('selected'); ta.value = btn.textContent.trim(); }
       document.getElementById('wa-char-count').textContent = ta.value.length;
     }
+
+    // Set register button href with QR ID
+    var regBtn = document.getElementById('btn-register');
+    if (regBtn) { regBtn.href = '/?qr=' + encodeURIComponent(QR_CODE_ID); }
 
     checkQR();
 
