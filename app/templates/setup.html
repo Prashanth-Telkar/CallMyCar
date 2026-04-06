@@ -56,24 +56,24 @@
       </form>
     </div>
 
+    <!-- Confetti canvas -->
+    <canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
+
     <!-- Success state -->
     <div id="success-card" class="card hidden" style="text-align: center;">
-      <div class="success-check">
+      <div class="success-check" style="width:72px;height:72px;margin:0 auto 16px;">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"/>
         </svg>
       </div>
-      <h2 style="color: var(--success);">QR Linked!</h2>
-      <p class="subtitle" style="margin: 12px 0;">
+      <h2 style="color: var(--success); font-size: 24px;">🎉 Congratulations!</h2>
+      <p class="subtitle" style="margin: 12px 0; font-size: 16px;">
         Your QR code <strong id="linked-qr"></strong> is now linked to vehicle
         <strong id="linked-vehicle"></strong>.
       </p>
       <p class="subtitle" style="margin-bottom: 20px;">
         Stick the QR on your vehicle. Anyone who scans it can contact you without seeing your number.
       </p>
-      <a href="/setup" class="btn btn-primary" style="display: inline-block; text-decoration: none; max-width: 280px; margin: 0 auto;">
-        Link Another QR
-      </a>
     </div>
 
     <div class="privacy-note" style="margin-top: 20px;">
@@ -150,12 +150,64 @@
         document.getElementById('linked-vehicle').textContent = data.vehicle_number;
         document.getElementById('link-form-card').classList.add('hidden');
         document.getElementById('success-card').classList.remove('hidden');
+        launchConfetti();
       } catch (err) {
         showAlert('Network error. Try again.', 'error');
       } finally {
         setLoading(btn, false);
       }
     });
+
+    // Confetti animation
+    function launchConfetti() {
+      var canvas = document.getElementById('confetti-canvas');
+      var ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      var colors = ['#4f46e5','#10b981','#f59e0b','#ef4444','#06b6d4','#8b5cf6','#ec4899','#f97316'];
+      var pieces = [];
+      for (var i = 0; i < 150; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          w: Math.random() * 10 + 5,
+          h: Math.random() * 6 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vy: Math.random() * 3 + 2,
+          vx: (Math.random() - 0.5) * 2,
+          rot: Math.random() * 360,
+          rv: (Math.random() - 0.5) * 8,
+          opacity: 1
+        });
+      }
+
+      var startTime = Date.now();
+      var duration = 3500;
+
+      function draw() {
+        var elapsed = Date.now() - startTime;
+        if (elapsed > duration) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var fade = elapsed > duration - 1000 ? (duration - elapsed) / 1000 : 1;
+        for (var i = 0; i < pieces.length; i++) {
+          var p = pieces[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.rv;
+          p.vy += 0.04;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot * Math.PI / 180);
+          ctx.globalAlpha = fade;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
   </script>
 </body>
 </html>
